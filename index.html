@@ -971,20 +971,44 @@ async function fetchTrafficLastYear() {
   const startDate = formatDate(start);
   const endDate = formatDate(end);
 
-  const url = `${KOKO_BASE}/stats?start_date=${startDate}&end_date=${endDate}&interval=day`;
+  const endpointCandidates = [
+    `${KOKO_BASE}/stats?start_date=${startDate}&end_date=${endDate}&interval=day`,
+    `${KOKO_BASE}/stats?start_date=${startDate}&end_date=${endDate}`,
+    `${KOKO_BASE}/analytics?start_date=${startDate}&end_date=${endDate}&interval=day`
+  ];
 
-  const res = await fetch(url, {
-    headers: {
-      'Authorization': AUTH
+  let json = null;
+  let lastError = null;
+
+  for (const url of endpointCandidates) {
+    for (const headers of [{ 'Authorization': AUTH }, {}]) {
+      try {
+        const res = await fetch(url, { headers });
+        if (!res.ok) {
+          lastError = new Error(`No se pudieron obtener estadísticas anuales (${res.status})`);
+          continue;
+        }
+        json = await res.json();
+        break;
+      } catch (err) {
+        lastError = err;
+      }
     }
-  });
 
-  if (!res.ok) {
-    throw new Error(`No se pudieron obtener estadísticas anuales (${res.status})`);
+    if (json) break;
   }
 
-  const json = await res.json();
-  const results = json.results || json.data || [];
+  if (!json) {
+    throw lastError || new Error('No se pudieron obtener estadísticas anuales');
+  }
+
+  const results =
+    json.results ||
+    json.data ||
+    json.stats ||
+    json.visits ||
+    json.items ||
+    [];
 
   const byDate = {};
   for (let i = 0; i < 365; i++) {
@@ -995,9 +1019,18 @@ async function fetchTrafficLastYear() {
   }
 
   results.forEach(item => {
-    const key = item.date?.slice(0, 10);
+    const rawDate = item.date || item.day || item.period || item.label;
+    const key = String(rawDate || '').slice(0, 10);
     if (key in byDate) {
-      byDate[key] = Number(item.visits || item.pageviews || item.count || 0);
+      byDate[key] = Number(
+        item.visits ||
+        item.visitors ||
+        item.pageviews ||
+        item.views ||
+        item.count ||
+        item.value ||
+        0
+      );
     }
   });
 
@@ -1069,6 +1102,8 @@ async function fetchAllData() {
     } catch (e) {
       console.error('Error cargando tráfico anual:', e);
       document.getElementById('kpi-visits').textContent = '—';
+      renderTrafficChart([], []);
+      setStatus('⚠ No se pudo cargar el tráfico anual', 'error');
     }
 
     if (Array.isArray(categories) && categories.length) {
