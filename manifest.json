@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Grok Video Sequence Automator",
+  "version": "0.1.0",
+  "description": "Automates chained Grok video generations with resumable state.",
+  "permissions": ["storage", "tabs", "scripting", "activeTab"],
+  "host_permissions": ["https://grok.com/*", "https://*.grok.com/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "action": {
+    "default_title": "Grok Sequence",
+    "default_popup": "src/popup/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://grok.com/*", "https://*.grok.com/*"],
+      "js": ["src/content/content-script.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

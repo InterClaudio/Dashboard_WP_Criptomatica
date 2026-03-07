@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grok Sequence</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main>
+    <h1>Grok Video Sequence</h1>
+
+    <label>Initial image
+      <input id="imageInput" type="file" accept="image/*" />
+    </label>
+
+    <label>Prompts (one per line, max 10)
+      <textarea id="prompts" rows="6" placeholder="Prompt 1&#10;Prompt 2"></textarea>
+    </label>
+
+    <div class="row">
+      <label>Orientation
+        <select id="orientation">
+          <option value="vertical">Vertical</option>
+          <option value="horizontal">Horizontal</option>
+        </select>
+      </label>
+
+      <label>Mode
+        <select id="mode">
+          <option value="automatic">Automatic</option>
+          <option value="step">Step-by-step</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="row">
+      <label><input id="mockMode" type="checkbox" /> Mock mode</label>
+      <label>Retry limit <input id="retryLimit" type="number" min="0" max="5" value="2" /></label>
+    </div>
+
+    <details>
+      <summary>Advanced selectors (JSON)</summary>
+      <textarea id="selectors" rows="8"></textarea>
+    </details>
+
+    <div class="actions">
+      <button id="saveConfig">Save</button>
+      <button id="start">Start</button>
+      <button id="resume">Resume</button>
+      <button id="next">Next</button>
+      <button id="pause">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+
+    <section class="status">
+      <h2>Progress</h2>
+      <pre id="progress"></pre>
+    </section>
+
+    <section class="logs">
+      <h2>Logs</h2>
+      <pre id="logs"></pre>
+    </section>
+  </main>
+
+  <script src="../shared/defaults.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
